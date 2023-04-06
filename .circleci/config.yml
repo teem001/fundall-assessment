@@ -17,6 +17,15 @@ jobs:
       - run:
           name: "Say hello"
           command: "echo Hello, World!"
+  example-job:
+    docker:
+      # replace with your preferred image
+      - image: cimg/base:stable
+    steps:
+      - docker/build:
+          path: . 
+          tag: olayinka 
+          image: fundall-assessment 
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
@@ -24,3 +33,10 @@ workflows:
   say-hello-workflow:
     jobs:
       - say-hello
+  example-workflow:
+    jobs:
+      - example-job     
+orbs:
+  docker: circleci/docker@1.7.0
+
+        
