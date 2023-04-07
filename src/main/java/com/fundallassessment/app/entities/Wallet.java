@@ -34,10 +34,10 @@ public class Wallet extends Base {
     @JoinColumn(name = "user_user_id")
     private User user;
     @OneToMany(mappedBy = "wallet")
-    private List<Card> bankDetails;
+    private List<Card> userCards;
 
     @OneToMany (mappedBy = "wallet", cascade = CascadeType.ALL)
-    private List<TransactionStatus> transactions;
+    private List<Transaction> transactions;
 }
 
 

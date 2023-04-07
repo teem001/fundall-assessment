@@ -16,13 +16,14 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
+public class Transaction extends Base {
     @Id
     @SequenceGenerator(
             name = "transaction_id_sequence",
             sequenceName = "transaction_id_sequence"
     )
     private Long transactionId;
+    private String transactionReference;
     private String transactionDescription;
     private TransactionStatus transactionStatus;
     private BigDecimal amount;
