@@ -1,9 +1,8 @@
 package com.fundallassessment.app.entities;
 
 import com.fundallassessment.app.enums.TransactionStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
+import com.fundallassessment.app.enums.TransactionType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,20 +11,25 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Entity
+@Table(name="transaction")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Transaction extends Base {
-    @Id
-    @SequenceGenerator(
-            name = "transaction_id_sequence",
-            sequenceName = "transaction_id_sequence"
-    )
-    private Long transactionId;
+
     private String transactionReference;
     private String transactionDescription;
+    private String name;
+    private String referenceNumber;
+    @Enumerated(
+            value = EnumType.STRING
+    )
     private TransactionStatus transactionStatus;
+    @Enumerated(
+                    value = EnumType.STRING
+            )
+    private TransactionType type;
     private BigDecimal amount;
 
 }

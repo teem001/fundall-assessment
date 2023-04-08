@@ -3,15 +3,15 @@ package com.fundallassessment.app.service.serviceimplementation;
 import com.fundallassessment.app.configurations.JwtUtils;
 import com.fundallassessment.app.dtos.requests.LoginRequest;
 import com.fundallassessment.app.dtos.requests.UserRegistrationRequest;
-import com.fundallassessment.app.dtos.responses.LoginResponse;
 import com.fundallassessment.app.dtos.responses.RegistrationResponse;
 import com.fundallassessment.app.dtos.responses.UserInfoResponse;
 import com.fundallassessment.app.entities.User;
+import com.fundallassessment.app.enums.Role;
 import com.fundallassessment.app.repositories.UserRepository;
 import com.fundallassessment.app.service.UserService;
 import com.fundallassessment.app.service.WalletService;
-import com.fundallassessment.app.utils.UserUtill;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +26,10 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserServiceImplementation implements UserService {
     private final UserRepository userRepository;
-    private final UserUtill userUtill;
+//    private final UserUtill userUtill;
     private final PasswordEncoder encoder;
     private ModelMapper mapper;
     private JwtUtils jwtUtils;
@@ -42,16 +43,19 @@ public class UserServiceImplementation implements UserService {
         Optional<User> userOptional = userRepository.findUserByEmail(request.getEmail());
 
         if(userOptional.isPresent()){
-           return ResponseEntity.status(HttpStatusCode.valueOf(403)).body(new RegistrationResponse("User already exits", false));
+           return ResponseEntity.status(HttpStatusCode.valueOf(403))
+                   .body(new RegistrationResponse("User already exits", false));
         }
 
         User user = mapper.map(request, User.class);
         user.setPassword(encoder.encode(user.getPassword()));
+        user.setRole(Role.SUPER_ADMIN);
 
         userRepository.save(user);
         walletService.createWallet(user);
 
-        return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(new RegistrationResponse("User registered successful", true));
+        return ResponseEntity.status(HttpStatusCode.valueOf(200))
+                .body(new RegistrationResponse("User registered successful", true));
     }
 
     @Override
@@ -68,10 +72,13 @@ public class UserServiceImplementation implements UserService {
             return  ResponseEntity
                     .status(403)
                     .body(
-                            new UserInfoResponse().setIsSuccess(false);
+                            new UserInfoResponse("invalid password", false)
                     );
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+
         String token = jwtUtils.generateToken(request.getEmail());
         User user = userRepository
                 .findUserByEmail(
@@ -79,11 +86,16 @@ public class UserServiceImplementation implements UserService {
                                 .getName()
                 )
                 .get();
-        LoginResponse loginResponse = LoginResponse.builder().build();
+        UserInfoResponse loginResponse = walletService.returnUserWalletInfo(user);
+
+        loginResponse.setMessage("login successful");
+        loginResponse.setIsSuccess(true);
+        loginResponse.setImgPath(user.getImageUrl());
+        loginResponse.setToken(token);
+
+        log.info("User in session is {}", principal.toString());
 
 
-
-
-        return null;
+        return ResponseEntity.ok(loginResponse);
     }
 }

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @Builder
+@AllArgsConstructor
 
 
 public class Card {
@@ -25,13 +26,31 @@ public class Card {
             generator = "card_id_sequence"
     )
     private Long cardId;
+    @Column(
+            unique = true
+    )
     private String cardNumber;
+    @Column(
+            unique = true
+    )
     private String cardName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private BigDecimal cardCost;
+    @ManyToOne
+    private User createdBy;
+
 
     public Card() {
 
+    }
+
+    @PrePersist
+    public void setCreatedAt(){
+        this.createdAt = LocalDateTime.now();
+    }
+    @PreUpdate
+    public void setUpdatedAt(){
+      this.updatedAt = LocalDateTime.now();
     }
 }

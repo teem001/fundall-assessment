@@ -13,7 +13,7 @@ public class UserPrincipal implements UserDetails  {
     private final User user;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+        return user.getRole().grantedAuthorities();
     }
 
     @Override

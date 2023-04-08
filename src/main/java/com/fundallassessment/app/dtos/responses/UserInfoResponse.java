@@ -20,7 +20,12 @@ public class UserInfoResponse {
     private Boolean isSuccess;
 
 
+    public UserInfoResponse(String message, Boolean isSuccess){
+        this.message = message;
+        this.isSuccess = isSuccess;
+    }
    public void setWalletResponseDetail(String accountNumber, BigDecimal accountBalance, BigDecimal income, BigDecimal spent, List<CardResponse> cardResponses, List<TransactionResponse> transactions){
+        this.walletResponse = new WalletResponse();
        this.walletResponse.cardResponses =cardResponses;
       this.walletResponse.accountBalance = accountBalance;
       this.walletResponse.transactions = transactions;

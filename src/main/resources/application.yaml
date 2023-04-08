@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: fundAll-assessment
+  datasource:
+    url: jdbc:mysql://localhost:3306/fundAll_assessment?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    password: "fundall-assessment"
+    username: "fundall-assessment"
+  jpa:
+    properties:
+      hibernate:
+        dialect:
+        format_sql: 'true'
+    hibernate:
+      ddl-auto: update
+    show-sql: 'true'

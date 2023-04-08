@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 @Getter
 @Setter
@@ -19,23 +20,23 @@ public abstract class Base implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "createdAt")
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="last_updated")
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
 
     @PrePersist
     public void createdAt(){
 
-        this.createdAt = new Date();
+        this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void updatedAt(){
 
-        this.updatedAt = new Date();
+        this.updatedAt = LocalDateTime.now();
     }
 
 }
