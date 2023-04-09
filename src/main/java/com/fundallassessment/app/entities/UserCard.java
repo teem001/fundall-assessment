@@ -16,9 +16,20 @@ import java.math.BigDecimal;
 public class UserCard extends Base {
 
     private Long userCardId;
-    @OneToOne
-    private Card cardId;
+    @OneToOne(mappedBy = "userCard")
+    private Card card;
     private String userCardNumber;
     private BigDecimal amountOnTheCard;
+    @ManyToOne
+    private Wallet wallet;
 
 }
+
+//    @OneToOne
+//    private Card cardId;
+//
+//    private String userCardNumber;
+//    private BigDecimal amountOnTheCard;
+//
+//    @ManyToOne
+//    private Wallet wallet;

@@ -29,7 +29,7 @@ public class CardServiceImplementation implements CardService {
 
     private final CardRepository cardRepository;
     private final UserUtils userUtils;
-    private final WalletService walletService;
+
     @Override
     public ResponseEntity<CardResponse> createCard(CardRequest request) {
 
@@ -38,10 +38,23 @@ public class CardServiceImplementation implements CardService {
         if(userInSession.getRole()== Role.USER){
             log.error("Unauthorised user");
             return ResponseEntity.status(HttpStatusCode.valueOf(403)).body(
-                    new CardResponse(false, "AUTHORIZED USER")
+                    CardResponse.builder()
+                            .isSuccess(false)
+                            .message("UNAUTHORISED")
+                            .build()
             );
         }
+        Optional<Card> cardOptional = cardRepository.getCardByCardNumber(request.getCardNumber());
+
         log.info("processing the card");
+        if(cardOptional.isPresent()){
+            return ResponseEntity.badRequest().body(
+                    CardResponse.builder()
+                            .isSuccess(false)
+                            .message("Card Instance already exits")
+                            .build());
+
+        }
 
         Card card = Card.builder()
                 .cardCost(request.getCardCost())
@@ -50,7 +63,12 @@ public class CardServiceImplementation implements CardService {
                 .createdBy(userInSession)
                 .build();
         cardRepository.save(card);
-        CardResponse response = new CardResponse(true, "Successful");
+        CardResponse response = CardResponse.builder()
+                .cardNumber(card.getCardNumber())
+                .cardName(card.getCardName())
+                .cardCost(card.getCardCost())
+                .message("successful")
+                .isSuccess(true).build();
 
         BeanUtils.copyProperties(request, response);
         log.info("Card created {}" ,card);
@@ -61,11 +79,11 @@ public class CardServiceImplementation implements CardService {
     @Override
     public ResponseEntity<String> deleteCard(String cardNumber) {
         Optional<Card> card = cardRepository.getCardByCardNumberOOrCardName(cardNumber);
-        if(card.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        cardRepository.delete(card.get());
-        return ResponseEntity.ok("Card successfully deleted");
+
+        return card.map(
+                p->
+                        ResponseEntity
+                                .ok("Card "+ p.getCardName() + "deleted successfully")).orElseGet(()->ResponseEntity.noContent().build());
 
     }
 

@@ -29,7 +29,6 @@ import java.util.Optional;
 @Slf4j
 public class UserServiceImplementation implements UserService {
     private final UserRepository userRepository;
-//    private final UserUtill userUtill;
     private final PasswordEncoder encoder;
     private ModelMapper mapper;
     private JwtUtils jwtUtils;

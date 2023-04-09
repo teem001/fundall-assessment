@@ -5,7 +5,7 @@ import com.fundallassessment.app.dtos.responses.TransactionResponse;
 import com.fundallassessment.app.dtos.responses.UserInfoResponse;
 import com.fundallassessment.app.entities.*;
 import com.fundallassessment.app.enums.TransactionType;
-import com.fundallassessment.app.execptions.InsufficientFundsException;
+
 import com.fundallassessment.app.repositories.WalletRepository;
 import com.fundallassessment.app.service.WalletService;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @AllArgsConstructor
 @Service
@@ -84,14 +83,14 @@ public class WalletServiceImplementation implements WalletService {
 
     @Override
     @Transactional
-    public UserInfoResponse setCashFlow(@NonNull User user, @NonNull BigDecimal amount, @NonNull TransactionType type) {
+    public UserInfoResponse setCashFlow(@NonNull User user, @NonNull Transaction transaction) {
 
-        log.info("Initiating a {} transaction for " + user, type.name());
+        log.info("Initiating a {} transaction for " + user, transaction.getType().name());
         UserInfoResponse userInfoResponse = returnUserWalletInfo(user);
         Wallet wallet = walletRepository.findWalletByUser(user).get();
 
 
-        if(amount.compareTo(new BigDecimal(0))<=0 || (amount.compareTo(wallet.getAccountBalance()) >0 && type == TransactionType.DEBIT) ){
+        if(transaction.getAmount().compareTo(new BigDecimal(0))<=0 || (transaction.getAmount().compareTo(wallet.getAccountBalance()) >0 && transaction.getType() == TransactionType.DEBIT) ){
             log.error("Insufficient funds for this transaction ");
             userInfoResponse.setIsSuccess(false);
             return userInfoResponse;
@@ -100,32 +99,23 @@ public class WalletServiceImplementation implements WalletService {
         }
 
 
-        if(type == TransactionType.CREDIT){
+        if(transaction.getType() == TransactionType.CREDIT){
             System.out.println("Credit ");
-            wallet.setAccountBalance(wallet.getAccountBalance().add(amount));
-            wallet.setIncome(wallet.getIncome().add(amount));
+            wallet.setAccountBalance(wallet.getAccountBalance().add(transaction.getAmount()));
+            wallet.setIncome(wallet.getIncome().add(transaction.getAmount()));
+
         }
         else  {
             System.out.println("Inside Debit ");
-            wallet.setAccountBalance(wallet.getAccountBalance().subtract(amount));
-            wallet.setIncome(wallet.getSpent().add(amount));
+            wallet.setAccountBalance(wallet.getAccountBalance().subtract(transaction.getAmount()));
+            wallet.setSpent(wallet.getSpent().add(transaction.getAmount()));
         }
         userInfoResponse.setIsSuccess(true);
+        wallet.getTransactions().add(transaction);
         log.info("the new wallet history is {}", wallet);
         return userInfoResponse;
 
     }
 
-    @Override
-    @Transactional
-    public UserInfoResponse addACardToUserWallet(@NonNull User user, @NonNull UserCard userCard) {
-        Wallet wallet = walletRepository.findWalletByUser(user).get();
-        setCashFlow(user,userCard.getCardId().getCardCost(),TransactionType.DEBIT );
-        userCard.setUserCardNumber(encoder.encode(userCard.getUserCardNumber().concat(wallet.getAccountNumber())));
-        wallet.setUserCards(Set.of(userCard));
-        return returnUserWalletInfo(user);
 
-
-
-    }
 }

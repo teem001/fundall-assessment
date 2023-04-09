@@ -25,7 +25,6 @@ public class Wallet extends Base {
     private BigDecimal spent;
     private String pin;
     @OneToOne
-
     private User user;
     @OneToMany
     private Set<UserCard> userCards;
@@ -34,4 +33,17 @@ public class Wallet extends Base {
     private List<Transaction> transactions;
 }
 
-
+//    private String accountNumber;
+//    private BigDecimal accountBalance;
+//    private BigDecimal income;
+//    private BigDecimal spent;
+//    private String pin;
+//
+//    @OneToOne(mappedBy = "wallet")
+//    private User user;
+//
+//    @OneToMany(mappedBy = "wallet")
+//    private Set<UserCard> userCards;
+//
+//    @OneToMany(mappedBy = "wallet")
+//    private List<Transaction> transactions;

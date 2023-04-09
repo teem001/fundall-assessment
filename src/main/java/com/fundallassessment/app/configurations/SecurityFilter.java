@@ -30,7 +30,7 @@ public class SecurityFilter {
             "/api/assessment/user/register"
                };
     private final String[] ADMIN_ONLY = {
-            "api/assessment/card/**"
+            "api/assessment/card","api/assessment/card/*","api/assessment/card/**"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,9 +40,9 @@ public class SecurityFilter {
                 .and()
                 .csrf()
                 .disable()
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .and()
+//                .exceptionHandling()
+//                .authenticationEntryPoint(authenticationEntryPoint)
+//                .and()
                 .authorizeHttpRequests()
                 .requestMatchers(AUTH_WHITE_LIST)
 

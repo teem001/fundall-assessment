@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -29,12 +31,14 @@ public class TransactionServiceImplementation implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserUtils utils;
     private final WalletService walletService;
+    private final WalletRepository walletRepository;
 
     @Override
     @Transactional
     public ResponseEntity<TransactionResponse> makeATransaction(TransactionRequest request) {
         log.info("transaction processing {}", request);
         User user = utils.getLoggedInUser();
+        TransactionResponse transactionResponse;
         Transaction transaction = Transaction.builder()
                 .transactionStatus(TransactionStatus.PENDING)
                 .referenceNumber(Timestamp.valueOf(LocalDateTime.now()).toString())
@@ -46,7 +50,7 @@ public class TransactionServiceImplementation implements TransactionService {
         transactionRepository.saveAndFlush(transaction);
 
 
-      UserInfoResponse userInfoResponse = walletService.setCashFlow(user, request.getAmount(),request.getType());
+      UserInfoResponse userInfoResponse = walletService.setCashFlow(user, transaction);
       if(userInfoResponse.getIsSuccess()==null){
           System.out.println("Inside null");
           transaction.setTransactionStatus(TransactionStatus.FAIL);
@@ -64,8 +68,11 @@ public class TransactionServiceImplementation implements TransactionService {
           transaction.setTransactionStatus(TransactionStatus.SUCCESS);
 
           transactionRepository.save(transaction);
+           transactionResponse = TransactionResponse.mapFromTransaction(transaction);
+          transactionResponse.setIsSuccess(true);
 
-          return ResponseEntity.ok(TransactionResponse.mapFromTransaction(transaction));
+
+          return ResponseEntity.ok(transactionResponse);
 
         }
       else{
@@ -74,8 +81,10 @@ public class TransactionServiceImplementation implements TransactionService {
             transaction.setTransactionStatus(TransactionStatus.FAIL);
 
             transactionRepository.save(transaction);
+             transactionResponse = TransactionResponse.mapFromTransaction(transaction);
+            transactionResponse.setIsSuccess(false);
 
-            return ResponseEntity.badRequest().body(TransactionResponse.mapFromTransaction(transaction));
+            return ResponseEntity.badRequest().body(transactionResponse);
 
 
 
@@ -85,5 +94,25 @@ public class TransactionServiceImplementation implements TransactionService {
 
 
 
+    }
+
+    @Override
+    public ResponseEntity<List<TransactionResponse>> getAllUserTransaction() {
+        User user = utils.getLoggedInUser();
+        Optional<Wallet> wallet = walletRepository.findWalletByUser(user);
+        return wallet.map(
+                a->
+                        ResponseEntity
+                                .ok(
+                                        TransactionResponse
+                                                .mapFromTransaction(
+                                                        a.getTransactions()
+                                                )
+                                )
+        )
+                .orElseGet(
+                        ()->ResponseEntity
+                                .notFound()
+                                .build());
     }
 }

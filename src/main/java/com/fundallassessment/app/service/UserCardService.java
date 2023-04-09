@@ -2,15 +2,14 @@ package com.fundallassessment.app.service;
 
 import com.fundallassessment.app.dtos.requests.CardRequest;
 import com.fundallassessment.app.dtos.responses.CardResponse;
+import com.fundallassessment.app.dtos.responses.UserCardResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface UserCardService {
-    ResponseEntity<CardResponse> createUserCard(CardRequest request);
-    ResponseEntity<String > deleteCard(String cardNumber);
-    ResponseEntity<CardResponse> updateCard(String searchKey,CardRequest request );
-    ResponseEntity<CardResponse> getACard(String cardNumber);
+    ResponseEntity<UserCardResponse> createUserCard(CardRequest request);
+
     ResponseEntity<List<CardResponse>> getAllCard();
-    ResponseEntity<List<CardResponse>> getAllCardCreatedByUser();
+    ResponseEntity<List<CardResponse>> getAllCardByUser();
 }

@@ -1,21 +1,26 @@
 package com.fundallassessment.app.service.serviceimplementation;
 
 import com.fundallassessment.app.dtos.requests.CardRequest;
+import com.fundallassessment.app.dtos.requests.TransactionRequest;
 import com.fundallassessment.app.dtos.responses.CardResponse;
-import com.fundallassessment.app.entities.Card;
-import com.fundallassessment.app.entities.User;
-import com.fundallassessment.app.entities.UserCard;
-import com.fundallassessment.app.entities.Wallet;
+import com.fundallassessment.app.dtos.responses.TransactionResponse;
+import com.fundallassessment.app.dtos.responses.UserCardResponse;
+import com.fundallassessment.app.entities.*;
 import com.fundallassessment.app.enums.TransactionType;
 import com.fundallassessment.app.repositories.CardRepository;
 import com.fundallassessment.app.repositories.UserCardRepository;
+import com.fundallassessment.app.repositories.WalletRepository;
+import com.fundallassessment.app.service.CardService;
+import com.fundallassessment.app.service.TransactionService;
 import com.fundallassessment.app.service.UserCardService;
 import com.fundallassessment.app.service.WalletService;
 import com.fundallassessment.app.utils.UserUtils;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,54 +29,90 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class UserCardServiceImplementation implements UserCardService {
-    private UserUtils utils;
-    private UserCardRepository userCardRepository;
-    private WalletService walletService;
-    private CardRepository cardRepository;
-    private PasswordEncoder encoder;
+    private final UserUtils utils;
+    private final UserCardRepository userCardRepository;
+    private final WalletService walletService;
+    private final CardRepository cardRepository;
+    private final WalletRepository walletRepository;
+    private final CardService cardService;
+    private final TransactionService transactionService;
     @Override
-    public ResponseEntity<CardResponse> createUserCard(CardRequest request) {
+    @Transactional
+    public ResponseEntity<UserCardResponse> createUserCard(@NonNull CardRequest request) {
         User user = utils.getLoggedInUser();
+
 
         Optional<Card> cardOptional = cardRepository.getCardByCardNumber(request.getCardNumber());
         if(cardOptional.isEmpty()){
-            return ResponseEntity.noContent().eTag("Card does not Exits").build();
+            return ResponseEntity
+                    .noContent()
+                    .build();
         }
         Card card = cardRepository.getCardByCardNumber(request.getCardNumber()).get();
         UserCard userCard =UserCard.builder()
-                .amountOnTheCard(new BigDecimal(0.00))
-                .cardId(card)
+                .amountOnTheCard(new BigDecimal("0.00"))
+                .card(card)
                 .userCardNumber((card.getCardNumber()))
                 .build();
 
-         walletService.addACardToUserWallet(user, userCard);
+        TransactionRequest transactionRequest = TransactionRequest.builder()
+                .transactionDescription(request.getCardName() + " " + request.getCardNumber())
+                .type(TransactionType.DEBIT)
+                .amount(request.getCardCost())
+                .name("Card payment")
+                .build();
+       TransactionResponse transactionResponse = transactionService.makeATransaction(transactionRequest).getBody();
+        Optional<Wallet> wallet = walletRepository.findWalletByUser(user);
+
+        boolean isSuccess = wallet.get().getTransactions().stream().anyMatch(p-> {
+            assert transactionResponse != null;
+            return p.getId().equals(transactionResponse.getTransactionId());
+        });
+
+
+
+
+
+       return wallet.filter(
+               p-> isSuccess)
+               .map(
+                       p -> {userCardRepository.save(userCard);
+                           p.getUserCards().add(userCard);
+
+                          return ResponseEntity
+                               .ok(
+                                       UserCardResponse
+                                               .builder()
+                                               .userInfoResponse(walletService.returnUserWalletInfo(user))
+                                               .cardName(request.getCardName())
+                                               .amount(request.getCardCost())
+                                               .isSuccess(true)
+                                               .message("card created")
+                                               .build());})
+               .orElseGet(
+                       ()->
+                               ResponseEntity
+                                       .badRequest()
+                                       .build());
 
 
 
     }
 
-    @Override
-    public ResponseEntity<String> deleteCard(String cardNumber) {
-        return null;
-    }
 
-    @Override
-    public ResponseEntity<CardResponse> updateCard(String searchKey, CardRequest request) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<CardResponse> getACard(String cardNumber) {
-        return null;
-    }
 
     @Override
     public ResponseEntity<List<CardResponse>> getAllCard() {
-        return null;
+        return cardService.getAllCard();
     }
 
     @Override
-    public ResponseEntity<List<CardResponse>> getAllCardCreatedByUser() {
-        return null;
+    public ResponseEntity<List<CardResponse>> getAllCardByUser() {
+        User user =utils.getLoggedInUser();
+       Optional <Wallet> wallet = walletRepository.findWalletByUser(user);
+       return null;
+
+
+
     }
 }

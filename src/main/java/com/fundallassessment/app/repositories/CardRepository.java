@@ -19,7 +19,7 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
     Optional<List<Card>> getAllByCreatedBy(User user);
 
-    @Query(value = "SELECT DISTINCT FROM card c WHERE c.card_name = ?1 or c.card_number = ?1  ", nativeQuery = true)
+    @Query(value = "SELECT * FROM card c WHERE c.card_name = ?1 or c.card_number = ?1 ", nativeQuery = true)
    Optional <Card> getCardByCardNumberOOrCardName(String searchKey);
     Optional<Card> getCardByCardNumber(String cardNumber);
 }

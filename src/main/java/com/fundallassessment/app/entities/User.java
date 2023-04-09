@@ -8,7 +8,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
+@Table(name ="user_table")
 @Builder
 @Data
 @AllArgsConstructor
@@ -29,6 +32,8 @@ public class User extends Base {
     private String address;
     @Enumerated(EnumType.STRING)
     private Role role;
+
+
 
 
 

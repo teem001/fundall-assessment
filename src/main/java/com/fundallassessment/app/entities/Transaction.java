@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Entity
-@Table(name="transaction")
+@Table(name="user_transaction")
 @Data
 @Builder
 @AllArgsConstructor
@@ -31,5 +31,7 @@ public class Transaction extends Base {
             )
     private TransactionType type;
     private BigDecimal amount;
+    @ManyToOne
+    private Wallet wallet;
 
 }

@@ -27,6 +27,7 @@ public class TransactionResponse {
     private LocalDateTime dateOfTransaction;
     private TransactionStatus transactionStatus;
     private String description;
+    private Boolean isSuccess;
 
 
     public static TransactionResponse mapFromTransaction (Transaction transaction){
