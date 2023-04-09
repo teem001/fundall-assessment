@@ -32,7 +32,7 @@ services:
   ### API Spring Boot ####
   server:
     container_name: demoserver
-    image: iykeafrica/spring_security_demo
+    image: teem001/fundall-assessment
     depends_on:
       - mysql
     environment:
