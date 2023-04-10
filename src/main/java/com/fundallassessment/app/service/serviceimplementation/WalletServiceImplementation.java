@@ -8,11 +8,12 @@ import com.fundallassessment.app.enums.TransactionType;
 
 import com.fundallassessment.app.repositories.WalletRepository;
 import com.fundallassessment.app.service.WalletService;
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,8 @@ import java.util.List;
 public class WalletServiceImplementation implements WalletService {
     private final WalletRepository walletRepository;
     private final PasswordEncoder encoder;
-    private final Dotenv dotenv;
+    @Value("${INITIAL_PIN}")
+    private final String defaultPin;
     private final ModelMapper mapper;
 
     @Override
@@ -39,7 +41,7 @@ public class WalletServiceImplementation implements WalletService {
                 .income(BigDecimal.valueOf(0.00))
                 .spent(BigDecimal.valueOf(0.00))
                 .user(user)
-                .pin(encoder.encode(dotenv.get("INITIAL_WALLET_PIN")))
+                .pin(encoder.encode(defaultPin))
                 .build();
         walletRepository.save(wallet);
         log.info("wallet successfully created for {}", user);

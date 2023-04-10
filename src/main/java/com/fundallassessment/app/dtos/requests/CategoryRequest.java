@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class CategoryRequest {
-    private BigDecimal amount;
     private String categoryTitle;
     private String description;
     private CategoryType categoryType;

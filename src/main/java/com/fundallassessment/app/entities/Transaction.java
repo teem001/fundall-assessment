@@ -34,4 +34,6 @@ public class Transaction extends Base {
     @ManyToOne
     private Wallet wallet;
 
+
+
 }

@@ -8,6 +8,7 @@ spring:
     url: jdbc:mysql://localhost:3306/fundAll_assessment?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     password: "fundall-assessment"
     username: "fundall-assessment"
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     properties:
       hibernate:
@@ -17,4 +18,4 @@ spring:
       ddl-auto: update
     show-sql: 'true'
 
-
+INITIAL_PIN : '0000'

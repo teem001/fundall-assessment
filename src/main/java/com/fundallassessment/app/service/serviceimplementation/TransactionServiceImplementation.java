@@ -3,10 +3,12 @@ package com.fundallassessment.app.service.serviceimplementation;
 import com.fundallassessment.app.dtos.requests.TransactionRequest;
 import com.fundallassessment.app.dtos.responses.TransactionResponse;
 import com.fundallassessment.app.dtos.responses.UserInfoResponse;
+import com.fundallassessment.app.entities.MerchantTracker;
 import com.fundallassessment.app.entities.Transaction;
 import com.fundallassessment.app.entities.User;
 import com.fundallassessment.app.entities.Wallet;
 import com.fundallassessment.app.enums.TransactionStatus;
+import com.fundallassessment.app.repositories.MerchantTrackerRepository;
 import com.fundallassessment.app.repositories.TransactionRepository;
 import com.fundallassessment.app.repositories.WalletRepository;
 import com.fundallassessment.app.service.TransactionService;
@@ -18,8 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +33,7 @@ import java.util.Optional;
 public class TransactionServiceImplementation implements TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final MerchantTrackerRepository merchantTrackerRepository;
     private final UserUtils utils;
     private final WalletService walletService;
     private final WalletRepository walletRepository;
@@ -39,6 +44,7 @@ public class TransactionServiceImplementation implements TransactionService {
         log.info("transaction processing {}", request);
         User user = utils.getLoggedInUser();
         TransactionResponse transactionResponse;
+
         Transaction transaction = Transaction.builder()
                 .transactionStatus(TransactionStatus.PENDING)
                 .referenceNumber(Timestamp.valueOf(LocalDateTime.now()).toString())
@@ -47,8 +53,21 @@ public class TransactionServiceImplementation implements TransactionService {
                 .amount(request.getAmount())
                 .name(request.getName())
                 .build();
-        transactionRepository.saveAndFlush(transaction);
+        Optional<MerchantTracker> merchantTrackerOptional = merchantTrackerRepository.getMerchantTrackerByName(request.getName());
+        if(merchantTrackerOptional.isEmpty()){
+            merchantTrackerRepository.save(MerchantTracker.builder()
+                            .totalAmount(new BigDecimal("0.00"))
+                    .numberOfTimes(0)
+                    .name(request.getName())
+                    .build());
+        }
+        else{
+         MerchantTracker merchantTracker =   merchantTrackerOptional.get();
+         merchantTracker.setTotalAmount(merchantTracker.getTotalAmount().add(request.getAmount()));
+         merchantTracker.setNumberOfTimes(merchantTracker.getNumberOfTimes() + 1);
+        }
 
+        transactionRepository.saveAndFlush(transaction);
 
       UserInfoResponse userInfoResponse = walletService.setCashFlow(user, transaction);
       if(userInfoResponse.getIsSuccess()==null){

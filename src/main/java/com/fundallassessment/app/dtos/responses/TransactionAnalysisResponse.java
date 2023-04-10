@@ -16,11 +16,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransactionAnalysisResponse {
-    private BigDecimal spendings;
+    private BigDecimal spending;
     private BigDecimal inflows;
     private BigDecimal expenses;
     private List<Merchant> listOfTopThreeMerchant;
-    private List<CategoryCard> ListOFCategory;
+    private List<CategoryCard> topCategories;
     private HashMap<CategoryCard, Double> incomeTracker;
 
 }
