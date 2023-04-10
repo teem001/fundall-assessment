@@ -48,7 +48,7 @@ public class UserServiceImplementation implements UserService {
 
         User user = mapper.map(request, User.class);
         user.setPassword(encoder.encode(user.getPassword()));
-        user.setRole(Role.SUPER_ADMIN);
+        user.setRole(Role.USER);
 
         userRepository.save(user);
         walletService.createWallet(user);

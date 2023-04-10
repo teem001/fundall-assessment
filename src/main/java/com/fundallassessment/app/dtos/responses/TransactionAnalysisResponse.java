@@ -21,6 +21,8 @@ public class TransactionAnalysisResponse {
     private BigDecimal expenses;
     private List<Merchant> listOfTopThreeMerchant;
     private List<CategoryCard> topCategories;
-    private HashMap<CategoryCard, Double> incomeTracker;
+    private HashMap<CategoryResponse, Double> incomeTracker;
+    private BigDecimal totalIncome;
+    private BigDecimal averageIncome ;
 
 }

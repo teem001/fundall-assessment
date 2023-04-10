@@ -14,6 +14,7 @@ import com.fundallassessment.app.utils.UserUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,7 +111,12 @@ public class CategoryCardServiceImplementation implements CategoryCardService {
     }
 
     @Override
-    public void deleteCategory(String category) {
+    public ResponseEntity<String> deleteCategory(String category) {
+        Optional<CategoryCard> cardOptional = categoryCardRepository.findCategoryCardByCategoryTitle(category);
+        if(cardOptional.isEmpty()) return ResponseEntity.badRequest().body("Category unavailable");
+
+        categoryCardRepository.delete(cardOptional.get());
+        return ResponseEntity.ok("Successfully deleted");
 
 
     }

@@ -11,5 +11,5 @@ public interface UserCardService {
     ResponseEntity<UserCardResponse> createUserCard(CardRequest request);
 
     ResponseEntity<List<CardResponse>> getAllCard();
-    ResponseEntity<List<CardResponse>> getAllCardByUser();
+    ResponseEntity<List<UserCardResponse>> getAllCardByUser();
 }

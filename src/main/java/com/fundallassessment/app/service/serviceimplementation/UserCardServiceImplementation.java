@@ -23,8 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -43,10 +45,14 @@ public class UserCardServiceImplementation implements UserCardService {
 
 
         Optional<Card> cardOptional = cardRepository.getCardByCardNumber(request.getCardNumber());
-        if(cardOptional.isEmpty()){
+        if(cardOptional.isPresent()){
             return ResponseEntity
-                    .noContent()
-                    .build();
+                    .badRequest().body(
+                            UserCardResponse.builder()
+                                    .message("card already exits")
+                                    .isSuccess(false)
+                                    .build()
+                    );
         }
         Card card = cardRepository.getCardByCardNumber(request.getCardNumber()).get();
         UserCard userCard =UserCard.builder()
@@ -107,10 +113,26 @@ public class UserCardServiceImplementation implements UserCardService {
     }
 
     @Override
-    public ResponseEntity<List<CardResponse>> getAllCardByUser() {
+    public ResponseEntity<List<UserCardResponse>> getAllCardByUser() {
         User user =utils.getLoggedInUser();
        Optional <Wallet> wallet = walletRepository.findWalletByUser(user);
-       return null;
+      if (wallet.isEmpty()){
+           return ResponseEntity.noContent().build();
+        }
+
+       Set<UserCard> userCards = wallet.get().getUserCards();
+       List<UserCardResponse> cardResponseList = new ArrayList<>();
+       for(UserCard card: userCards){
+           UserCardResponse cardResponse = UserCardResponse.builder()
+                   .userInfoResponse(walletService.returnUserWalletInfo(user))
+                   .cardName(card.getCard().getCardName())
+                   .isSuccess(true)
+                   .message("available")
+                   .amount(card.getAmountOnTheCard())
+                   .build();
+           cardResponseList.add(cardResponse);
+       }
+       return ResponseEntity.ok(cardResponseList);
 
 
 

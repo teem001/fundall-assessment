@@ -28,13 +28,12 @@ import java.util.List;
 public class WalletServiceImplementation implements WalletService {
     private final WalletRepository walletRepository;
     private final PasswordEncoder encoder;
-    @Value("${INITIAL_PIN}")
-    private final String defaultPin;
     private final ModelMapper mapper;
 
     @Override
      public void createWallet(@NonNull User user) {
         log.info("Creating wallet for {}",user.toString() );
+        String defaultPin = "0000";
         Wallet wallet = Wallet.builder()
                 .accountBalance( BigDecimal.valueOf(0.00))
                 .accountNumber(user.getPhoneNumber().trim().substring(1))

@@ -24,8 +24,8 @@ public class UserCardController {
     ResponseEntity<List<CardResponse>> getAllCard(){
         return userCardService.getAllCard();
     }
-    @GetMapping("/all")
-    ResponseEntity<List<CardResponse>> getAllCardByUser(){
+    @GetMapping("/user")
+    ResponseEntity<List<UserCardResponse>> getAllCardByUser(){
         return userCardService.getAllCardByUser();
     }
 }

@@ -25,11 +25,3 @@ public class UserCard extends Base {
 
 }
 
-//    @OneToOne
-//    private Card cardId;
-//
-//    private String userCardNumber;
-//    private BigDecimal amountOnTheCard;
-//
-//    @ManyToOne
-//    private Wallet wallet;

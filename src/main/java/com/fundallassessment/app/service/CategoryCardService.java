@@ -14,7 +14,7 @@ public interface CategoryCardService {
     List<CategoryResponse> getAllCategory();
     List<CategoryResponse> getAllCategoryByCategoryType(CategoryType type);
 
-    void deleteCategory(String category);
+    ResponseEntity<String> deleteCategory(String category);
 
 
 }
